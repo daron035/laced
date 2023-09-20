@@ -16,7 +16,7 @@ user_urlpatterns = [
     path("api/auth/jwt/verify/", CustomTokenVerifyView.as_view()),
     path("api/auth/logout/", LogoutView.as_view()),
     re_path(
-        r"^api/auth/o/(?P<provider>\S+)/$",
+        r"^api/o/(?P<provider>\S+)/$",
         CustomProviderAuthView.as_view(),
         name="provider-auth",
     ),

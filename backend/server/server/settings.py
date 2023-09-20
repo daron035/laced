@@ -134,15 +134,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "user.UserAccount"
 
 AUTH_COOKIE = "access"
-AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 5
+AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 60 * 5
 AUTH_COOKIE_REFRESH_MAX_AGE = 60 * 60 * 24
-AUTH_COOKIE_SECURE = getenv("AUTH_COOKIE_SECURE", "True") == "True"
+# AUTH_COOKIE_SECURE = getenv("AUTH_COOKIE_SECURE", "True") == "True"
+AUTH_COOKIE_SECURE = False
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = "/"
 AUTH_COOKIE_SAMESITE = "None"
 
 AUTHENTICATION_BACKENDS = [
     "social_core.backends.google.GoogleOAuth2",
+    "social_core.backends.vk.VKOAuth2",
     "social_core.backends.facebook.FacebookOAuth2",
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -157,11 +159,12 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("JWT",),
-    # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1440),
+    "ROTATE_REFRESH_TOKENS": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=AUTH_COOKIE_ACCESS_MAX_AGE),
     # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     # "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),
     # "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    # "REFRESH_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(seconds=AUTH_COOKIE_ACCESS_MAX_AGE),
 }
 
 DJOSER = {
@@ -181,7 +184,10 @@ DJOSER = {
     "USER_CREATE_PASSWORD_RETYPE": True,
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
     "TOKEN_MODEL": None,
-    "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": ["http://localhost:3000/auth/google"],
+    "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": [
+        "http://localhost:3000/users/google",
+        "http://localhost:3000/users/vk",
+    ],
     # "SOCIAL_AUTH_ALLOWED_REDIREC_URIS": getenv("REDIRECT_URLS").split(","),
 }
 
@@ -196,15 +202,17 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 ]
 SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["first_name", "last_name"]
 
+SOCIAL_AUTH_VK_OAUTH2_KEY = "8120512"
+SOCIAL_AUTH_VK_OAUTH2_SECRET = "ZL0mWfSytO4VWQUU7CJJ"
+
 # SOCIAL_AUTH_FACEBOOK_KEY = getenv("FACEBOOK_AUTH_KEY")
 # SOCIAL_AUTH_FACEBOOK_SECRET = getenv("FACEBOOK_AUTH_SECRET_KEY")
 # SOCIAL_AUTH_FACEBOOK_SCOPE = ["email"]
 # SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {"fields": "email, first_name, last_name"}
 
 
-CORS_ALLOWED_ORIGINS = getenv(
-    "CORS_ALLOWED_ORIGINS", "http://locahost:3000, http://127.0.0.1:3000"
-).split(",")
+# CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Email settings

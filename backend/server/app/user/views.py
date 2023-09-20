@@ -14,7 +14,7 @@ class CustomProviderAuthView(ProviderAuthView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
-        if response.statuse_code == 201:
+        if response.status_code == 201:
             access_token = response.data.get("access")
             refresh_token = response.data.get("refresh")
 
@@ -72,6 +72,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
+        print()
+        print("REFRESH")
+        # print(request.COOKIES)
         refresh_token = request.COOKIES.get("refresh")
 
         if refresh_token:
@@ -81,11 +84,21 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         if response.status_code == 200:
             access_token = response.data.get("access")
+            refresh_token = response.data.get("refresh")
 
             response.set_cookie(
                 "access",
                 access_token,
                 max_age=settings.AUTH_COOKIE_ACCESS_MAX_AGE,
+                path=settings.AUTH_COOKIE_PATH,
+                secure=settings.AUTH_COOKIE_SECURE,
+                httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+            )
+            response.set_cookie(
+                "refresh",
+                refresh_token,
+                max_age=settings.AUTH_COOKIE_REFRESH_MAX_AGE,
                 path=settings.AUTH_COOKIE_PATH,
                 secure=settings.AUTH_COOKIE_SECURE,
                 httponly=settings.AUTH_COOKIE_HTTP_ONLY,
@@ -97,10 +110,18 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class CustomTokenVerifyView(TokenVerifyView):
     def post(self, request, *args, **kwargs):
+        print()
+        print("VERIFY")
+        # print(request.COOKIES)
         access_token = request.COOKIES.get("access")
+        refresh_token = request.COOKIES.get("refresh")
 
         if access_token:
             request.data["token"] = access_token
+        elif refresh_token:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         return super().post(request, *args, **kwargs)
 
